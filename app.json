@@ -1,6 +1,8 @@
 {
+  "name": "flash-travel-app",
+  "displayName": "flash-travel-app",
   "expo": {
-    "name": "flash-travel-app",
+    "name": "Flash Travel",
     "slug": "flash-travel-app",
     "version": "1.0.0",
     "orientation": "portrait",
