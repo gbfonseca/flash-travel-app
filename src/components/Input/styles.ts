@@ -9,7 +9,7 @@ interface IContainerProps {
 export const Container = styled.View<IContainerProps>`
   width: 100%;
   height: 45px;
-  background: ${({ theme }) => theme.colors.grayLight};
+  background: ${({ theme }) => theme.colors.border};
   margin: 10px 0;
   flex-direction: row;
   align-items: center;

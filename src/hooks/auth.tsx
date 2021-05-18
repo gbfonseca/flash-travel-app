@@ -9,15 +9,17 @@ import React, {
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { Credentials, User } from '~/models';
+import { Credentials, SignUpCredentials, User } from '~/models';
 import api from '~/services/api';
 import AuthenticationService from '~/services/Authentication.service';
 
 interface AuthContextData {
   user: User;
   signIn(data: Credentials): void;
+  signUp(data: SignUpCredentials): void;
   signed: boolean;
   loading: boolean;
+  signOut(): void;
 }
 
 interface AuthProviderProps {
@@ -46,7 +48,19 @@ export function AuthProvider({ children }: AuthProviderProps): ReactElement {
     loadStoragedData();
   }, []);
 
-  const signIn = async (data: Credentials) => {
+  async function signUp(data: SignUpCredentials): Promise<void> {
+    setLoading(true);
+    try {
+      await AuthenticationService.signUp(data);
+      setLoading(false);
+    } catch (err) {
+      setLoading(false);
+
+      console.log(err);
+    }
+  }
+
+  async function signIn(data: Credentials): Promise<void> {
     setLoading(true);
     try {
       const response = await AuthenticationService.signIn(data);
@@ -65,10 +79,18 @@ export function AuthProvider({ children }: AuthProviderProps): ReactElement {
 
       console.log(error);
     }
-  };
+  }
+
+  async function signOut(): Promise<void> {
+    await AsyncStorage.removeItem('@Flash Travel: token');
+    await AsyncStorage.removeItem('@Flash Travel: user');
+    setUser(null);
+  }
 
   return (
-    <AuthContext.Provider value={{ user, signIn, signed: !!user, loading }}>
+    <AuthContext.Provider
+      value={{ user, signIn, signed: !!user, signOut, loading, signUp }}
+    >
       {children}
     </AuthContext.Provider>
   );

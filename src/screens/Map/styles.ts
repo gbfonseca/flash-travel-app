@@ -80,6 +80,7 @@ export const SearchView = styled.View.attrs({
   border-radius: 15px;
   padding: 8px;
   margin-top: 10px;
+  margin-bottom: 30px;
   flex-direction: row;
   align-items: center;
 `;
@@ -88,5 +89,40 @@ export const Input = styled.TextInput`
   padding: 0 10px;
   color: ${({ theme }) => theme.colors.grayDark};
   font-size: ${({ theme }) => theme.fontSizes.size16};
+  font-family: ${({ theme }) => theme.fontFamily.interRegular};
+`;
+
+export const LocationsView = styled.TouchableOpacity`
+  width: 90%;
+  flex-direction: row;
+  justify-content: center;
+  padding-bottom: 15px;
+  border-bottom-width: 1px;
+  border-bottom-color: ${({ theme }) => theme.colors.border};
+`;
+
+export const IconBackground = styled.View`
+  width: 40px;
+  height: 40px;
+  background-color: ${({ theme }) => theme.colors.border};
+  border-radius: 25px;
+  justify-content: center;
+  align-items: center;
+`;
+
+export const LocationInfo = styled.View`
+  margin-left: 10px;
+  flex: 1;
+`;
+
+export const LocationAddress = styled.Text`
+  color: ${({ theme }) => theme.colors.grayDark};
+  font-size: ${({ theme }) => theme.fontSizes.size16};
+  font-family: ${({ theme }) => theme.fontFamily.interRegular};
+`;
+
+export const LocationCity = styled.Text`
+  color: ${({ theme }) => theme.colors.grayLight};
+  font-size: ${({ theme }) => theme.fontSizes.size13};
   font-family: ${({ theme }) => theme.fontFamily.interRegular};
 `;

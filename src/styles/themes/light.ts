@@ -4,7 +4,7 @@ export default {
     shadow: '#E7EAF0',
     border: '#D5DDE0',
     gray: '#3E4958',
-    grayLight: '#F7F8F9',
+    grayLight: '#97ADB6',
     grayDark: '#515151',
     black: '#000000',
     blackLight: '#3E4958',

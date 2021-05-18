@@ -1,7 +1,7 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { Alert, Image, Text, TouchableOpacity } from 'react-native';
 
-import { Feather } from '@expo/vector-icons';
+import { Entypo, Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/core';
 import { useIsDrawerOpen } from '@react-navigation/drawer';
 import * as Location from 'expo-location';
@@ -18,6 +18,11 @@ import {
   ButtonDraggable,
   SearchView,
   Input,
+  LocationsView,
+  IconBackground,
+  LocationInfo,
+  LocationAddress,
+  LocationCity,
 } from './styles';
 
 type LocationType = {
@@ -71,17 +76,12 @@ function Map(): ReactElement {
           initialRegion={{
             latitude: location.latitude,
             longitude: location.longitude,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
+            latitudeDelta: 0.0043,
+            longitudeDelta: 0.0034,
           }}
-        >
-          <Marker
-            coordinate={{
-              latitude: location.latitude,
-              longitude: location.longitude,
-            }}
-          />
-        </MapStyled>
+          showsUserLocation
+          showsMyLocationButton
+        />
         <IconButton onPress={handleDrawer}>
           <Image source={MenuShape} />
         </IconButton>
@@ -98,8 +98,17 @@ function Map(): ReactElement {
           </TouchableOpacity>
           <SearchView>
             <Feather name="search" size={21} color="#1152FD" />
-            <Input />
+            <Input placeholder="Para onde deseja ir ?" />
           </SearchView>
+          <LocationsView>
+            <IconBackground>
+              <Entypo name="location-pin" size={24} color="white" />
+            </IconBackground>
+            <LocationInfo>
+              <LocationAddress>83, Midwood St</LocationAddress>
+              <LocationCity>New york</LocationCity>
+            </LocationInfo>
+          </LocationsView>
         </BottomView>
       </Content>
     </Container>

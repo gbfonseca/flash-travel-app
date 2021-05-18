@@ -26,11 +26,11 @@ interface CustomDrawerProps {
 }
 
 function CustomDrawer({ navigation }: CustomDrawerProps): ReactElement {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
 
   async function handleSignOut(): Promise<void> {
     navigation.closeDrawer();
-    // signOut();
+    signOut();
   }
 
   return (
