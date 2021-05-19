@@ -50,7 +50,7 @@ export const BottomView = styled.View.attrs({
   position: absolute;
   bottom: 0;
   width: 100%;
-  height: 240px;
+  height: 320px;
   background: ${({ theme }) => theme.colors.white};
   border-top-left-radius: 25px;
   border-top-right-radius: 25px;
@@ -93,12 +93,11 @@ export const Input = styled.TextInput`
 `;
 
 export const LocationsView = styled.TouchableOpacity`
-  width: 90%;
+  width: 100%;
   flex-direction: row;
   justify-content: center;
-  padding-bottom: 15px;
-  border-bottom-width: 1px;
-  border-bottom-color: ${({ theme }) => theme.colors.border};
+  /* padding-bottom: 15px; */
+  margin-top: 10px;
 `;
 
 export const IconBackground = styled.View`
@@ -119,6 +118,7 @@ export const LocationAddress = styled.Text`
   color: ${({ theme }) => theme.colors.grayDark};
   font-size: ${({ theme }) => theme.fontSizes.size16};
   font-family: ${({ theme }) => theme.fontFamily.interRegular};
+  max-width: 100%;
 `;
 
 export const LocationCity = styled.Text`

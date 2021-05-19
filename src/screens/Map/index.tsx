@@ -1,13 +1,20 @@
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useMemo, useState } from 'react';
 import { Alert, Image, Text, TouchableOpacity } from 'react-native';
 
 import { Entypo, Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/core';
 import { useIsDrawerOpen } from '@react-navigation/drawer';
 import * as Location from 'expo-location';
+import {
+  GooglePlacesAutocomplete,
+  GooglePlaceData,
+} from 'react-native-google-places-autocomplete';
 import { Marker } from 'react-native-maps';
+import MapViewDirections from 'react-native-maps-directions';
 
-import { MenuShape } from '~/assets/icons';
+import { Flag, MenuShape, Pin } from '~/assets/icons';
+import { customMapStyle } from '~/config/custom-style-map';
+import { googleAPIKEY } from '~/config/google-key';
 
 import {
   Container,
@@ -32,6 +39,8 @@ type LocationType = {
 
 function Map(): ReactElement {
   const [location, setLocation] = useState<LocationType>(null);
+  const [destination, setDestination] = useState(null);
+
   const isDrawerOpen = useIsDrawerOpen();
 
   const navigation = useNavigation<any>();
@@ -60,6 +69,30 @@ function Map(): ReactElement {
     }
   };
 
+  const handleSetDestination = (data: GooglePlaceData) => {
+    // console.log(data);
+    setDestination(data.description);
+  };
+
+  const RouteMemo = useMemo(() => {
+    return (
+      <MapViewDirections
+        origin={location}
+        destination={destination}
+        apikey={googleAPIKEY}
+        mode="DRIVING"
+        precision="low"
+        strokeWidth={3}
+        strokeColor="#1152FD"
+        onStart={(params) => {
+          console.log(
+            `Started routing between "${params.origin}" and "${params.destination}"`,
+          );
+        }}
+      />
+    );
+  }, [destination, location]);
+
   if (!location) {
     return (
       <Container>
@@ -73,15 +106,30 @@ function Map(): ReactElement {
       <Content>
         <MapStyled
           provider="google"
+          customMapStyle={customMapStyle}
           initialRegion={{
             latitude: location.latitude,
             longitude: location.longitude,
             latitudeDelta: 0.0043,
             longitudeDelta: 0.0034,
           }}
+          onPress={(value) =>
+            setDestination({
+              latitude: value.nativeEvent.coordinate.latitude,
+              longitude: value.nativeEvent.coordinate.longitude,
+            })
+          }
           showsUserLocation
           showsMyLocationButton
-        />
+        >
+          {destination && (
+            <>
+              <Marker draggable coordinate={location} image={Pin} />
+              {/* <Marker draggable coordinate={destination} image={Flag} /> */}
+              {RouteMemo}
+            </>
+          )}
+        </MapStyled>
         <IconButton onPress={handleDrawer}>
           <Image source={MenuShape} />
         </IconButton>
@@ -97,10 +145,49 @@ function Map(): ReactElement {
             <ButtonDraggable />
           </TouchableOpacity>
           <SearchView>
-            <Feather name="search" size={21} color="#1152FD" />
-            <Input placeholder="Para onde deseja ir ?" />
+            <GooglePlacesAutocomplete
+              placeholder="Para onde deseja ir ?"
+              suppressDefaultStyles
+              isRowScrollable={false}
+              query={{
+                key: googleAPIKEY,
+                language: 'pt-BR',
+                components: 'country:br',
+                location: 'latitude,longitude',
+              }}
+              styles={{
+                description: { display: 'none' },
+                textInputContainer: {
+                  width: '100%',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                },
+                textInput: {
+                  marginLeft: 10,
+                  height: 50,
+                  fontSize: 17,
+                  color: '#515151',
+                  width: '100%',
+                },
+                powered: { display: 'none' },
+                container: { width: '100%', elevation: 0 },
+              }}
+              renderRow={(item: GooglePlaceData) => (
+                <LocationsView onPress={() => handleSetDestination(item)}>
+                  <IconBackground>
+                    <Entypo name="location-pin" size={24} color="white" />
+                  </IconBackground>
+                  <LocationInfo>
+                    <LocationAddress>{item.description}</LocationAddress>
+                    <LocationCity>
+                      {item.structured_formatting.secondary_text}
+                    </LocationCity>
+                  </LocationInfo>
+                </LocationsView>
+              )}
+            />
           </SearchView>
-          <LocationsView>
+          {/* <LocationsView>
             <IconBackground>
               <Entypo name="location-pin" size={24} color="white" />
             </IconBackground>
@@ -108,7 +195,7 @@ function Map(): ReactElement {
               <LocationAddress>83, Midwood St</LocationAddress>
               <LocationCity>New york</LocationCity>
             </LocationInfo>
-          </LocationsView>
+          </LocationsView> */}
         </BottomView>
       </Content>
     </Container>
