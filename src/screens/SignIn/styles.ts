@@ -23,6 +23,11 @@ export const Content = styled.View`
   justify-content: center;
 `;
 
+export const LogoImage = styled.Image`
+  width: 220px;
+  height: 120px;
+`;
+
 export const FormBox = styled.View`
   flex: 1;
   max-width: 320px;

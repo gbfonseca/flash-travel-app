@@ -16,6 +16,11 @@ export const HeaderText = styled.Text`
   font-size: ${({ theme }) => theme.fontSizes.size21};
 `;
 
+export const LogoImage = styled.Image`
+  width: 220px;
+  height: 120px;
+`;
+
 export const Content = styled.View`
   flex: 1;
   padding-top: 70px;

@@ -12,6 +12,7 @@ import { FormHandles } from '@unform/core';
 import { Form } from '@unform/mobile';
 import LottieView from 'lottie-react-native';
 
+import { LogoIcon } from '~/assets/icons';
 import { LoadingCar } from '~/assets/loading';
 import { Button, Input } from '~/components';
 import { useAuth } from '~/hooks/auth';
@@ -29,6 +30,7 @@ import {
   SocialLoginText,
   Border,
   SocialButtonsView,
+  LogoImage,
 } from './styles';
 
 function SignIn(): ReactElement {
@@ -51,6 +53,8 @@ function SignIn(): ReactElement {
         </Header>
 
         <Content>
+          <LogoImage source={LogoIcon} />
+
           <FormBox>
             <Form ref={formRef} onSubmit={handleSubmit}>
               <InputTitle>E-mail:</InputTitle>
@@ -110,7 +114,7 @@ function SignIn(): ReactElement {
             justifyContent: 'center',
             flexDirection: 'row',
             paddingBottom: 20,
-            marginTop: 120,
+            marginTop: 40,
           }}
           onPress={() => navigate('SignUp')}
         >

@@ -1,5 +1,9 @@
 import MapView from 'react-native-maps';
-import styled from 'styled-components/native';
+import styled, { css } from 'styled-components/native';
+
+interface IBottomView {
+  expand: boolean;
+}
 
 export const Container = styled.View`
   flex: 1;
@@ -46,7 +50,7 @@ export const BottomView = styled.View.attrs({
   shadowRadius: 3.84,
 
   elevation: 5,
-})`
+})<IBottomView>`
   position: absolute;
   bottom: 0;
   width: 100%;
@@ -55,6 +59,12 @@ export const BottomView = styled.View.attrs({
   border-top-left-radius: 25px;
   border-top-right-radius: 25px;
   align-items: center;
+
+  ${(props) =>
+    props.expand &&
+    css`
+      height: 480px;
+    `}
 `;
 
 export const ButtonDraggable = styled.View`
@@ -64,7 +74,7 @@ export const ButtonDraggable = styled.View`
   margin-top: 10px;
 `;
 
-export const SearchView = styled.View.attrs({
+export const ContentSearch = styled.View.attrs({
   shadowColor: '#000',
   shadowOffset: {
     width: 0,
@@ -74,15 +84,38 @@ export const SearchView = styled.View.attrs({
   shadowRadius: 3.84,
 
   elevation: 5,
-})`
+})<IBottomView>`
   width: 90%;
+  height: 70px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  border-radius: 25px;
+  background: ${({ theme }) => theme.colors.white};
+  ${(props) =>
+    props.expand &&
+    css`
+      height: 140px;
+    `}
+`;
+
+export const SearchView = styled.View<IBottomView>`
+  width: 100%;
+  height: 60px;
   background: ${({ theme }) => theme.colors.white};
   border-radius: 15px;
   padding: 8px;
-  margin-top: 10px;
-  margin-bottom: 30px;
+  margin-top: 5px;
   flex-direction: row;
   align-items: center;
+
+  ${(props) =>
+    props.expand &&
+    css`
+      border-radius: 0px;
+      border-bottom-width: 0.5px;
+      margin: 0;
+    `}
 `;
 export const Input = styled.TextInput`
   flex: 1;
@@ -93,10 +126,11 @@ export const Input = styled.TextInput`
 `;
 
 export const LocationsView = styled.TouchableOpacity`
-  width: 100%;
+  width: 90%;
+
   flex-direction: row;
   justify-content: center;
-  /* padding-bottom: 15px; */
+  padding-bottom: 15px;
   margin-top: 10px;
 `;
 
@@ -125,4 +159,17 @@ export const LocationCity = styled.Text`
   color: ${({ theme }) => theme.colors.grayLight};
   font-size: ${({ theme }) => theme.fontSizes.size13};
   font-family: ${({ theme }) => theme.fontFamily.interRegular};
+`;
+
+export const ShowMapButton = styled.TouchableOpacity`
+  flex-direction: row;
+  width: 90%;
+  margin: 30px 15px;
+`;
+
+export const ShowMapText = styled.Text`
+  color: ${({ theme }) => theme.colors.primary};
+  font-size: ${({ theme }) => theme.fontSizes.size15};
+  font-family: ${({ theme }) => theme.fontFamily.interRegular};
+  margin-left: 10px;
 `;

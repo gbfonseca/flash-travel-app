@@ -12,6 +12,7 @@ import { Form } from '@unform/mobile';
 import LottieView from 'lottie-react-native';
 import * as Yup from 'yup';
 
+import { LogoIcon } from '~/assets/icons';
 import { LoadingCar } from '~/assets/loading';
 import { Button, Input, MaskedInput } from '~/components';
 import { useAuth } from '~/hooks/auth';
@@ -25,6 +26,7 @@ import {
   HeaderText,
   InputTitle,
   BottomTextHilight,
+  LogoImage,
 } from './styles';
 
 function SignUp(): ReactElement {
@@ -63,10 +65,12 @@ function SignUp(): ReactElement {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <Header>
-          <HeaderText>Cadastro </HeaderText>
+          <HeaderText>Cadastrar-se</HeaderText>
         </Header>
 
         <Content>
+          <LogoImage source={LogoIcon} />
+
           <FormBox>
             <Form ref={formRef} onSubmit={handleSubmit}>
               <InputTitle>Nome:</InputTitle>

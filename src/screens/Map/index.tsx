@@ -1,20 +1,20 @@
 import React, { ReactElement, useEffect, useMemo, useState } from 'react';
-import { Alert, Image, Text, TouchableOpacity } from 'react-native';
+import { Alert, Image, Text, TouchableOpacity, View } from 'react-native';
 
-import { Entypo, Feather } from '@expo/vector-icons';
+import { Entypo, Feather, FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/core';
 import { useIsDrawerOpen } from '@react-navigation/drawer';
 import * as Location from 'expo-location';
-import {
-  GooglePlacesAutocomplete,
-  GooglePlaceData,
-} from 'react-native-google-places-autocomplete';
+import { ScrollView } from 'react-native-gesture-handler';
 import { Marker } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
 
-import { Flag, MenuShape, Pin } from '~/assets/icons';
+import { Flag, MenuShape, OriginDestiny, Pin } from '~/assets/icons';
 import { customMapStyle } from '~/config/custom-style-map';
 import { googleAPIKEY } from '~/config/google-key';
+import { PlaceAutoComplete } from '~/models';
+import { Prediction } from '~/models/PlaceAutoComplete';
+import UtilsService from '~/services/Utils.service';
 
 import {
   Container,
@@ -24,12 +24,15 @@ import {
   BottomView,
   ButtonDraggable,
   SearchView,
-  Input,
   LocationsView,
   IconBackground,
   LocationInfo,
   LocationAddress,
   LocationCity,
+  Input,
+  ContentSearch,
+  ShowMapButton,
+  ShowMapText,
 } from './styles';
 
 type LocationType = {
@@ -39,10 +42,16 @@ type LocationType = {
 
 function Map(): ReactElement {
   const [location, setLocation] = useState<LocationType>(null);
-  const [destination, setDestination] = useState(null);
+  const [locationAddress, setLocationAddress] = useState<string>(null);
+  const [destination, setDestination] = useState<LocationType>(null);
+  const [destinationAddress, setDestinationAddress] = useState<string>(null);
+  const [expand, setExpand] = useState(false);
+  const [places, setPlaces] = useState<PlaceAutoComplete>(null);
+  const [focus, setFocus] = useState('destiny');
 
   const isDrawerOpen = useIsDrawerOpen();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const navigation = useNavigation<any>();
   useEffect(() => {
     const loadPermissions = async () => {
@@ -69,9 +78,58 @@ function Map(): ReactElement {
     }
   };
 
-  const handleSetDestination = (data: GooglePlaceData) => {
-    // console.log(data);
-    setDestination(data.description);
+  const handlePlaceAutoComplete = async (value: string) => {
+    if (value.length > 4) {
+      const response = await UtilsService.PlaceAutoComplete(value);
+      setPlaces(response);
+    }
+  };
+
+  const handleSetDestination = async (data: Prediction) => {
+    try {
+      const response = await UtilsService.GeocodingAddress(data.description);
+      const { location: geocodigLocation } = response.results[0].geometry;
+      setDestination({
+        latitude: geocodigLocation.lat,
+        longitude: geocodigLocation.lng,
+      });
+      setDestinationAddress(data.description);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleSetOrigin = async (data: Prediction) => {
+    try {
+      const response = await UtilsService.GeocodingAddress(data.description);
+      const { location: geocodigLocation } = response.results[0].geometry;
+      setLocation({
+        latitude: geocodigLocation.lat,
+        longitude: geocodigLocation.lng,
+      });
+      setLocationAddress(data.description);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleDestinationOnMarker = async (value) => {
+    try {
+      const { coordinate } = value.nativeEvent;
+      const response = await UtilsService.GeocodingLatLng(
+        coordinate.latitude,
+        coordinate.longitude,
+      );
+      const { location: geocodigLocation } = response.results[0].geometry;
+      const { formatted_address } = response.results[0];
+      setDestination({
+        latitude: geocodigLocation.lat,
+        longitude: geocodigLocation.lng,
+      });
+      setDestinationAddress(formatted_address);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const RouteMemo = useMemo(() => {
@@ -81,7 +139,7 @@ function Map(): ReactElement {
         destination={destination}
         apikey={googleAPIKEY}
         mode="DRIVING"
-        precision="low"
+        precision="high"
         strokeWidth={3}
         strokeColor="#1152FD"
         onStart={(params) => {
@@ -113,19 +171,14 @@ function Map(): ReactElement {
             latitudeDelta: 0.0043,
             longitudeDelta: 0.0034,
           }}
-          onPress={(value) =>
-            setDestination({
-              latitude: value.nativeEvent.coordinate.latitude,
-              longitude: value.nativeEvent.coordinate.longitude,
-            })
-          }
+          onPress={(value) => handleDestinationOnMarker(value)}
           showsUserLocation
           showsMyLocationButton
         >
           {destination && (
             <>
               <Marker draggable coordinate={location} image={Pin} />
-              {/* <Marker draggable coordinate={destination} image={Flag} /> */}
+              <Marker draggable coordinate={destination} image={Flag} />
               {RouteMemo}
             </>
           )}
@@ -133,7 +186,7 @@ function Map(): ReactElement {
         <IconButton onPress={handleDrawer}>
           <Image source={MenuShape} />
         </IconButton>
-        <BottomView>
+        <BottomView expand={expand}>
           <TouchableOpacity
             style={{
               width: '100%',
@@ -141,61 +194,72 @@ function Map(): ReactElement {
               justifyContent: 'center',
               height: 40,
             }}
+            onPress={() => setExpand((prevState) => !prevState)}
           >
             <ButtonDraggable />
           </TouchableOpacity>
-          <SearchView>
-            <GooglePlacesAutocomplete
-              placeholder="Para onde deseja ir ?"
-              suppressDefaultStyles
-              isRowScrollable={false}
-              query={{
-                key: googleAPIKEY,
-                language: 'pt-BR',
-                components: 'country:br',
-                location: 'latitude,longitude',
-              }}
-              styles={{
-                description: { display: 'none' },
-                textInputContainer: {
-                  width: '100%',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                },
-                textInput: {
-                  marginLeft: 10,
-                  height: 50,
-                  fontSize: 17,
-                  color: '#515151',
-                  width: '100%',
-                },
-                powered: { display: 'none' },
-                container: { width: '100%', elevation: 0 },
-              }}
-              renderRow={(item: GooglePlaceData) => (
-                <LocationsView onPress={() => handleSetDestination(item)}>
-                  <IconBackground>
-                    <Entypo name="location-pin" size={24} color="white" />
-                  </IconBackground>
-                  <LocationInfo>
-                    <LocationAddress>{item.description}</LocationAddress>
-                    <LocationCity>
-                      {item.structured_formatting.secondary_text}
-                    </LocationCity>
-                  </LocationInfo>
-                </LocationsView>
+          <ContentSearch expand={expand}>
+            {expand && (
+              <Image source={OriginDestiny} style={{ marginRight: 10 }} />
+            )}
+            <View style={{ width: '90%' }}>
+              {expand && (
+                <SearchView expand={expand}>
+                  <Input
+                    placeholder="Onde você está?"
+                    value={locationAddress}
+                    onChangeText={async (value) => {
+                      handlePlaceAutoComplete(value);
+                      setLocationAddress(value);
+                    }}
+                    onFocus={() => setFocus('origin')}
+                  />
+                </SearchView>
               )}
-            />
-          </SearchView>
-          {/* <LocationsView>
-            <IconBackground>
-              <Entypo name="location-pin" size={24} color="white" />
-            </IconBackground>
-            <LocationInfo>
-              <LocationAddress>83, Midwood St</LocationAddress>
-              <LocationCity>New york</LocationCity>
-            </LocationInfo>
-          </LocationsView> */}
+              <SearchView expand={expand} style={{ borderBottomWidth: 0 }}>
+                {!expand && <Feather name="search" size={24} color="#1152FD" />}
+                <Input
+                  placeholder="Para onde deseja Ir?"
+                  value={destinationAddress}
+                  onChangeText={async (value) => {
+                    handlePlaceAutoComplete(value);
+                    setDestinationAddress(value);
+                  }}
+                  onFocus={() => setFocus('destiny')}
+                />
+              </SearchView>
+            </View>
+          </ContentSearch>
+          {expand && (
+            <ShowMapButton>
+              <FontAwesome name="map-pin" size={24} color="#1152FD" />
+              <ShowMapText>Visualizar no Mapa</ShowMapText>
+            </ShowMapButton>
+          )}
+          <ScrollView style={{ width: '90%' }}>
+            {places?.predictions.map((place) => (
+              <LocationsView
+                key={place.description}
+                onPress={() => {
+                  if (focus === 'destiny') {
+                    handleSetDestination(place);
+                  } else {
+                    handleSetOrigin(place);
+                  }
+                }}
+              >
+                <IconBackground>
+                  <Entypo name="location-pin" size={24} color="white" />
+                </IconBackground>
+                <LocationInfo>
+                  <LocationAddress>{place.description}</LocationAddress>
+                  <LocationCity>
+                    {place?.terms?.pop()?.value}, {place?.terms?.pop()?.value}
+                  </LocationCity>
+                </LocationInfo>
+              </LocationsView>
+            ))}
+          </ScrollView>
         </BottomView>
       </Content>
     </Container>
